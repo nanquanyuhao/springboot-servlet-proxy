@@ -2,6 +2,7 @@ package net.nanquanyuhao.proxy.servlet;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.util.EntityUtils;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
@@ -10,6 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -19,6 +22,28 @@ public class MultiProxyServlet extends ProxyServlet {
      * 记录是否具备对应的目标对象
      */
     private Map<String, TargetObject> targetObjectMap = new Hashtable<>();
+
+    // 测试代码
+    public MultiProxyServlet() {
+        super();
+        TargetObject to1 = new TargetObject();
+        to1.setTargetUri("http://192.168.235.111:3000");
+        try {
+            to1.setTargetHost(URIUtils.extractHost(new URI(to1.getTargetUri())));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        targetObjectMap.put("/ceph/1", to1);
+
+        TargetObject to2 = new TargetObject();
+        to2.setTargetUri("http://192.168.235.222:3000");
+        try {
+            to2.setTargetHost(URIUtils.extractHost(new URI(to2.getTargetUri())));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        targetObjectMap.put("/ceph/2", to2);
+    }
 
     /**
      * 出错方法的修改
@@ -48,16 +73,6 @@ public class MultiProxyServlet extends ProxyServlet {
 
         // 添加 ATTR_TARGET_URI 以及 ATTR_TARGET_HOST 值
         addTargetValue(servletRequest);
-
-        if (servletRequest.getAttribute(ATTR_TARGET_URI) == null) {
-            // 重点修改的地方，需使用当前记录的正确的目标地址
-            servletRequest.setAttribute(ATTR_TARGET_URI, this.targetUri);
-        }
-
-        if (servletRequest.getAttribute(ATTR_TARGET_HOST) == null) {
-            // 重点修改的地方，需使用当前记录的正确的目标主机
-            servletRequest.setAttribute(ATTR_TARGET_HOST, this.targetHost);
-        }
 
         String method = servletRequest.getMethod();
         String proxyRequestUri = this.rewriteUrlFromRequest(servletRequest);
@@ -113,10 +128,24 @@ public class MultiProxyServlet extends ProxyServlet {
 
     private void addTargetValue(HttpServletRequest servletRequest){
 
-        String urlStr = servletRequest.getServletPath();
+        String servletPath = servletRequest.getServletPath();
+        String pathInfo = servletRequest.getPathInfo();
 
-        if (urlStr != null && urlStr.startsWith("/proxy")){
+        // 进行代理的相关处理
+        String key = servletPath + pathInfo.substring(0, pathInfo.indexOf("/", 1));
 
+        if (targetObjectMap.containsKey(key)){
+            TargetObject to = targetObjectMap.get(key);
+
+            if (servletRequest.getAttribute(ATTR_TARGET_URI) == null) {
+                // 重点修改的地方，需使用当前记录的正确的目标地址
+                servletRequest.setAttribute(ATTR_TARGET_URI, to.getTargetUri());
+            }
+
+            if (servletRequest.getAttribute(ATTR_TARGET_HOST) == null) {
+                // 重点修改的地方，需使用当前记录的正确的目标主机
+                servletRequest.setAttribute(ATTR_TARGET_HOST, to.getTargetHost());
+            }
         }
     }
 }
