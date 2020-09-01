@@ -1,8 +1,11 @@
 package net.nanquanyuhao.proxy.filter;
 
+import net.nanquanyuhao.demo.DemoService;
 import net.nanquanyuhao.proxy.conf.TargetObject;
 import org.apache.http.client.utils.URIUtils;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +20,8 @@ import java.util.Map;
  */
 public class ProxyFilter implements Filter {
 
+    // 借以证明可以获取 Spring 中的对象进行方法调用
+    private DemoService demoService;
     /**
      * 记录是否具备对应的目标对象
      */
@@ -45,6 +50,13 @@ public class ProxyFilter implements Filter {
     }
 
     @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        ServletContext context = filterConfig.getServletContext();
+        ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(context);
+        demoService = ac.getBean(DemoService.class);
+    }
+
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
 
@@ -53,6 +65,8 @@ public class ProxyFilter implements Filter {
     }
 
     private void addTargetValue(ServletRequest sr) {
+
+        System.out.println(demoService.getInfo());
 
         HttpServletRequest servletRequest = (HttpServletRequest) sr;
         String servletPath = servletRequest.getServletPath();
