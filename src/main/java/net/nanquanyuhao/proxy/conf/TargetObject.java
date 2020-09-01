@@ -1,4 +1,4 @@
-package net.nanquanyuhao.proxy.servlet;
+package net.nanquanyuhao.proxy.conf;
 
 import org.apache.http.HttpHost;
 

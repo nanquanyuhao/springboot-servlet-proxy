@@ -1,12 +1,11 @@
 package net.nanquanyuhao.proxy.conf;
 
-import net.nanquanyuhao.proxy.servlet.MultiProxyServlet;
+import net.nanquanyuhao.proxy.filter.ProxyFilter;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,41 +18,18 @@ import javax.servlet.http.HttpServletRequest;
 public class ProxyConfiguration {
 
     @Bean
-    public ServletRegistrationBean<ProxyServlet> servletRegistrationBean1() {
+    public FilterRegistrationBean getFilterRegistrationBean() {
 
-        ServletRegistrationBean<ProxyServlet> servletRegistrationBean =
-                new ServletRegistrationBean<>(new MultiProxyServlet(), "/ceph/*");
-        servletRegistrationBean.addInitParameter("targetUri", "http://192.168.235.101:3000");
-        servletRegistrationBean.addInitParameter(
-                ProxyServlet.P_LOG, "true");
+        ProxyFilter pf = new ProxyFilter();
 
-        return servletRegistrationBean;
-    }
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(pf);
+        filterRegistrationBean.addUrlPatterns("/ceph/*");
 
-    /*@Bean
-    public ServletRegistrationBean<ProxyServlet> servletRegistrationBean1() {
-
-        ServletRegistrationBean<ProxyServlet> servletRegistrationBean =
-                new ServletRegistrationBean<>(new ProxyServlet() {
-
-                    @Override
-                    protected String rewritePathInfoFromRequest(HttpServletRequest servletRequest) {
-                        String servletPath = servletRequest.getServletPath();
-                        String pathInfo = servletRequest.getPathInfo();
-
-                        return servletPath + pathInfo;
-                    }
-                }, "/ceph/1/*");
-        servletRegistrationBean.addInitParameter("targetUri", "http://192.168.235.101:3000");
-        servletRegistrationBean.addInitParameter(
-                ProxyServlet.P_LOG, "true");
-        servletRegistrationBean.setName("ServletRegistrationBeanProxy1");
-
-        return servletRegistrationBean;
+        return filterRegistrationBean;
     }
 
     @Bean
-    public ServletRegistrationBean<ProxyServlet> servletRegistrationBean2() {
+    public ServletRegistrationBean<ProxyServlet> servletRegistrationBean1() {
 
         ServletRegistrationBean<ProxyServlet> servletRegistrationBean =
                 new ServletRegistrationBean<>(new ProxyServlet() {
@@ -65,12 +41,11 @@ public class ProxyConfiguration {
 
                         return servletPath + pathInfo;
                     }
-                }, "/ceph/2/*");
+                }, "/ceph/*");
         servletRegistrationBean.addInitParameter("targetUri", "http://192.168.235.101:3000");
         servletRegistrationBean.addInitParameter(
                 ProxyServlet.P_LOG, "true");
-        servletRegistrationBean.setName("ServletRegistrationBeanProxy2");
 
         return servletRegistrationBean;
-    }*/
+    }
 }
