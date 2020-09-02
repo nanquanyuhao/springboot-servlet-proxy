@@ -2,6 +2,7 @@ package net.nanquanyuhao.proxy.filter;
 
 import net.nanquanyuhao.demo.DemoService;
 import net.nanquanyuhao.proxy.conf.TargetObject;
+import net.nanquanyuhao.proxy.conf.TargetObjectResult;
 import org.apache.http.client.utils.URIUtils;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 import org.springframework.context.ApplicationContext;
@@ -22,32 +23,11 @@ public class ProxyFilter implements Filter {
 
     // 借以证明可以获取 Spring 中的对象进行方法调用
     private DemoService demoService;
+
     /**
      * 记录是否具备对应的目标对象
      */
     private Map<String, TargetObject> targetObjectMap = new Hashtable<>();
-
-    // 测试代码
-    public ProxyFilter() {
-
-        TargetObject to1 = new TargetObject();
-        to1.setTargetUri("http://192.168.235.111:3000");
-        try {
-            to1.setTargetHost(URIUtils.extractHost(new URI(to1.getTargetUri())));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        targetObjectMap.put("/ceph/1", to1);
-
-        TargetObject to2 = new TargetObject();
-        to2.setTargetUri("http://192.168.235.222:3000");
-        try {
-            to2.setTargetHost(URIUtils.extractHost(new URI(to2.getTargetUri())));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        targetObjectMap.put("/ceph/2", to2);
-    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -65,8 +45,6 @@ public class ProxyFilter implements Filter {
     }
 
     private void addTargetValue(ServletRequest sr) {
-
-        System.out.println(demoService.getInfo());
 
         HttpServletRequest servletRequest = (HttpServletRequest) sr;
         String servletPath = servletRequest.getServletPath();
@@ -87,6 +65,24 @@ public class ProxyFilter implements Filter {
                 // 重点修改的地方，需使用当前记录的正确的目标主机
                 servletRequest.setAttribute(ProxyServlet.class.getSimpleName() + ".targetUri", to.getTargetHost());
             }
+        } else {
+            // 查询是否符合被代理条件，并进行处理
+            if (addProxyTarget(key)){
+                // 递归调用
+                this.addTargetValue(sr);
+            }
         }
+    }
+
+    private boolean addProxyTarget(String key){
+
+        TargetObjectResult tor = demoService.ahjustContainsKeyAndReturn(key);
+        // 判断是否允许进行代理
+        if (tor.isContains()){
+            TargetObject to = tor.getTargetObject();
+            targetObjectMap.put(key, to);
+            return true;
+        }
+        return false;
     }
 }

@@ -10,9 +10,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @date 2020/9/1
  */
 @SpringBootApplication
-public class ProxtTestApplication {
+public class ProxyTestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProxtTestApplication.class, args);
+        SpringApplication.run(ProxyTestApplication.class, args);
     }
 }
