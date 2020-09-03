@@ -42,7 +42,7 @@ public class ProxyConfiguration {
                         return servletPath + pathInfo;
                     }
                 }, "/ceph/*");
-        servletRegistrationBean.addInitParameter("targetUri", "http://192.168.235.101:3000");
+        servletRegistrationBean.addInitParameter("targetUri", "http://192.168.235.129");
         servletRegistrationBean.addInitParameter(
                 ProxyServlet.P_LOG, "true");
 

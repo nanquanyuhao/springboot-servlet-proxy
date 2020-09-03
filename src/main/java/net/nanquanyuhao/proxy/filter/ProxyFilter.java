@@ -61,9 +61,9 @@ public class ProxyFilter implements Filter {
                 servletRequest.setAttribute(ProxyServlet.class.getSimpleName() + ".targetUri", to.getTargetUri());
             }
 
-            if (servletRequest.getAttribute(ProxyServlet.class.getSimpleName() + ".targetUri") == null) {
+            if (servletRequest.getAttribute(ProxyServlet.class.getSimpleName() + ".targetHost") == null) {
                 // 重点修改的地方，需使用当前记录的正确的目标主机
-                servletRequest.setAttribute(ProxyServlet.class.getSimpleName() + ".targetUri", to.getTargetHost());
+                servletRequest.setAttribute(ProxyServlet.class.getSimpleName() + ".targetHost", to.getTargetHost());
             }
         } else {
             // 查询是否符合被代理条件，并进行处理

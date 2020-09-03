@@ -32,7 +32,7 @@ public class DemoServiceImpl implements DemoService {
         if ("/ceph/1/".equals(value) || "/ceph/2/".equals(value)) {
 
             TargetObject targetObject = new TargetObject();
-            targetObject.setTargetUri("http://192.168.235.111:3000");
+            targetObject.setTargetUri("http://192.168.235.129:8080");
             try {
                 targetObject.setTargetHost(URIUtils.extractHost(new URI(targetObject.getTargetUri())));
             } catch (URISyntaxException e) {
