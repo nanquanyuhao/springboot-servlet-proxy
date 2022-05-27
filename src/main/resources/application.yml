@@ -1,0 +1,6 @@
+proxy:
+  video:
+    servlet_url:
+      - /video/*
+    target_url: http://119.164.216.243:31125
+    loggingEnabled: true
